@@ -1,0 +1,14 @@
+@MusicPlayer.ApiHost = http://localhost:5100
+
+GET {{MusicPlayer.ApiHost}}/health/
+Accept: text/plain
+
+###
+
+GET {{MusicPlayer.ApiHost}}/api/v1/system/status
+Accept: application/json
+
+###
+
+GET {{MusicPlayer.ApiHost}}/openapi/v1.json
+Accept: application/json

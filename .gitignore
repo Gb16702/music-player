@@ -1,0 +1,33 @@
+# Secrets and local configuration
+.env
+.env.*
+!.env.example
+appsettings.Development.json
+**/appsettings.Local.json
+
+# JavaScript / Bun
+node_modules/
+.bun/
+.output/
+.vinxi/
+dist/
+coverage/
+
+# .NET
+**/bin/
+**/obj/
+TestResults/
+
+# Editors and operating systems
+.idea/
+.vs/
+.vscode/
+*.user
+*.suo
+.DS_Store
+Thumbs.db
+
+# Logs and temporary files
+*.log
+tmp/
+temp/
