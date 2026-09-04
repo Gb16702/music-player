@@ -1,8 +1,11 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using MusicPlayer.Application.Abstractions.Identity;
+using MusicPlayer.Application.Abstractions.Persistence;
 using MusicPlayer.Infrastructure.Identity;
 using MusicPlayer.Infrastructure.Persistence;
+using MusicPlayer.Infrastructure.Persistence.Repositories;
 using MusicPlayer.Infrastructure.Spotify;
 
 namespace MusicPlayer.Infrastructure
@@ -23,6 +26,12 @@ namespace MusicPlayer.Infrastructure
             var identityBuilder = services.AddIdentityCore<ApplicationUser>();
 
             identityBuilder.AddEntityFrameworkStores<MusicPlayerDbContext>();
+
+            services.AddScoped<IUserProfileRepository, UserProfileRepository>();
+
+            services.AddScoped<IUnitOfWork>(provider => provider.GetRequiredService<MusicPlayerDbContext>());
+
+            services.AddScoped<IIdentityService, IdentityService>();
 
             services.AddOptions<SpotifyOptions>()
                 .Bind(configuration.GetSection(SpotifyOptions.SectionName))
