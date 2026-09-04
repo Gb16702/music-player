@@ -1,10 +1,12 @@
-using MusicPlayer.Api.Contracts;
+using MusicPlayer.Api.Endpoints;
+using MusicPlayer.Infrastructure;
 using Scalar.AspNetCore;
 
 const string LocalWebClientPolicy = "LocalWebClient";
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddProblemDetails();
 builder.Services.AddOpenApi();
 builder.Services.AddHealthChecks();
@@ -35,12 +37,7 @@ app.MapHealthChecks("/health");
 
 var api = app.MapGroup("/api/v1");
 
-api.MapGet("/system/status", () =>
-        TypedResults.Ok(new SystemStatusResponse("ok", DateTimeOffset.UtcNow)))
-    .WithName("GetSystemStatus")
-    .WithSummary("Returns the API availability status.")
-    .WithDescription("Checks whether the API is available and running.")
-    .WithTags("System");
+api.MapSystemEndpoints();
 
 app.Run();
 

@@ -1,11 +1,10 @@
 using System.Net.Http.Json;
-using Microsoft.AspNetCore.Mvc.Testing;
 using MusicPlayer.Api.Contracts;
 
 namespace MusicPlayer.IntegrationTests;
 
-public sealed class SystemStatusEndpointTests(WebApplicationFactory<Program> application)
-    : IClassFixture<WebApplicationFactory<Program>>
+public sealed class SystemStatusEndpointTests(MusicPlayerApiFactory application)
+    : IClassFixture<MusicPlayerApiFactory>
 {
     [Fact]
     public async Task GetSystemStatusReturnsAHealthyPayload()
