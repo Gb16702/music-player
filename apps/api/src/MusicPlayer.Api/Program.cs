@@ -1,4 +1,5 @@
 using MusicPlayer.Api.Endpoints;
+using MusicPlayer.Application;
 using MusicPlayer.Infrastructure;
 using Scalar.AspNetCore;
 
@@ -7,6 +8,7 @@ const string LocalWebClientPolicy = "LocalWebClient";
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddInfrastructure(builder.Configuration);
+builder.Services.AddApplication();
 builder.Services.AddProblemDetails();
 builder.Services.AddOpenApi();
 builder.Services.AddHealthChecks();
