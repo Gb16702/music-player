@@ -20,6 +20,19 @@ namespace MusicPlayer.Application.Users.Register
 
         public async Task<Result<Guid>> HandleAsync(RegisterUserCommand command, CancellationToken cancellationToken)
         {
+            string normalizedDisplayName;
+
+            try
+            {
+                normalizedDisplayName = UserProfile.NormalizeDisplayName(command.DisplayName);
+            }
+            catch (ArgumentException exception)
+            {
+                return Result<Guid>.Failure(RegistrationErrors.InvalidDisplayName(exception.Message));
+            }
+
+            await using var transaction = await _unitOfWork.BeginTransactionAsync(cancellationToken);
+
             var createUserResult = await _identityService.CreateUserAsync(command.Email, command.Password, cancellationToken);
 
             if (!createUserResult.IsSuccess)
@@ -27,20 +40,15 @@ namespace MusicPlayer.Application.Users.Register
                 return Result<Guid>.Failure(createUserResult.Error!);
             }
 
-            try
-            {
-                var userProfile = new UserProfile(createUserResult.Value!, command.DisplayName);
+            var userProfile = new UserProfile(createUserResult.Value!, normalizedDisplayName);
 
-                _userProfileRepository.Add(userProfile);
+            _userProfileRepository.Add(userProfile);
 
-                await _unitOfWork.SaveChangesAsync(cancellationToken);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-                return Result<Guid>.Success(createUserResult.Value!);
-            }
-            catch (ArgumentException exception)
-            {
-                return Result<Guid>.Failure(RegistrationErrors.InvalidDisplayName(exception.Message));
-            }
+            await transaction.CommitAsync(cancellationToken);
+
+            return Result<Guid>.Success(createUserResult.Value!);
         }
     }
 }

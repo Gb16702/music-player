@@ -29,10 +29,9 @@ RegisterUserCommand → RegisterUserHandler
 Done: handler + DI (`AddApplication`), persistence, 9 backend tests, frontend status page.
 
 Next:
-1. Atomic account + profile creation
-2. `POST /api/v1/auth/register` + tests
+1. `POST /api/v1/auth/register` + tests
 
-Blockers: account/profile not atomic; no HTTP endpoint yet.
+Blockers: no HTTP endpoint yet.
 
 ## Commands
 

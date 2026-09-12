@@ -24,7 +24,7 @@ namespace MusicPlayer.Domain.Users
             DisplayName = NormalizeDisplayName(displayName);
         }
 
-        private static string NormalizeDisplayName(string displayName)
+        public static string NormalizeDisplayName(string displayName)
         {
             if (string.IsNullOrWhiteSpace(displayName))
             {

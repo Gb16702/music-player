@@ -18,11 +18,28 @@ namespace MusicPlayer.Infrastructure.Persistence
             }
         }
 
+        public Task<IUnitOfWorkTransaction> BeginTransactionAsync(CancellationToken cancellationToken = default)
+        {
+            return BeginTransactionInternalAsync(cancellationToken);
+        }
+
+        public new Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+        {
+            return base.SaveChangesAsync(cancellationToken);
+        }
+
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
 
             builder.ApplyConfigurationsFromAssembly(typeof(MusicPlayerDbContext).Assembly);
+        }
+
+        private async Task<IUnitOfWorkTransaction> BeginTransactionInternalAsync(CancellationToken cancellationToken)
+        {
+            var transaction = await Database.BeginTransactionAsync(cancellationToken);
+
+            return new EfUnitOfWorkTransaction(transaction);
         }
     }
 }

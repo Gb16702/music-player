@@ -12,10 +12,11 @@ public sealed class RegisterUserHandlerTests
     public async Task HandleAsyncReturnsUserIdWhenRegistrationSucceeds()
     {
         var userId = Guid.NewGuid();
+        var unitOfWork = new FakeUnitOfWork();
         var handler = CreateHandler(
             new FakeIdentityService(Result<Guid>.Success(userId)),
             new FakeUserProfileRepository(),
-            new FakeUnitOfWork());
+            unitOfWork);
 
         var result = await handler.HandleAsync(
             new RegisterUserCommand("user@example.com", "Password1!", "Jane Doe"),
@@ -23,16 +24,18 @@ public sealed class RegisterUserHandlerTests
 
         Assert.True(result.IsSuccess);
         Assert.Equal(userId, result.Value);
+        Assert.True(unitOfWork.Transaction!.IsCommitted);
     }
 
     [Fact]
     public async Task HandleAsyncReturnsIdentityErrorWhenUserCreationFails()
     {
+        var unitOfWork = new FakeUnitOfWork();
         var identityError = RegistrationErrors.EmailAlreadyExists("Email is already taken.");
         var handler = CreateHandler(
             new FakeIdentityService(Result<Guid>.Failure(identityError)),
             new FakeUserProfileRepository(),
-            new FakeUnitOfWork());
+            unitOfWork);
 
         var result = await handler.HandleAsync(
             new RegisterUserCommand("user@example.com", "Password1!", "Jane Doe"),
@@ -41,13 +44,15 @@ public sealed class RegisterUserHandlerTests
         Assert.False(result.IsSuccess);
         Assert.Equal(RegistrationErrors.EmailAlreadyExistsCode, result.Error!.Code);
         Assert.Equal("Email is already taken.", result.Error.Message);
+        Assert.False(unitOfWork.Transaction!.IsCommitted);
     }
 
     [Fact]
     public async Task HandleAsyncReturnsInvalidDisplayNameWhenProfileIsInvalid()
     {
+        var identityService = new FakeIdentityService(Result<Guid>.Success(Guid.NewGuid()));
         var handler = CreateHandler(
-            new FakeIdentityService(Result<Guid>.Success(Guid.NewGuid())),
+            identityService,
             new FakeUserProfileRepository(),
             new FakeUnitOfWork());
 
@@ -57,6 +62,7 @@ public sealed class RegisterUserHandlerTests
 
         Assert.False(result.IsSuccess);
         Assert.Equal(RegistrationErrors.InvalidDisplayNameCode, result.Error!.Code);
+        Assert.Equal(0, identityService.CallCount);
     }
 
     private static RegisterUserHandler CreateHandler(
@@ -69,8 +75,12 @@ public sealed class RegisterUserHandlerTests
 
     private sealed class FakeIdentityService(Result<Guid> result) : IIdentityService
     {
+        public int CallCount { get; private set; }
+
         public Task<Result<Guid>> CreateUserAsync(string email, string password, CancellationToken cancellationToken)
         {
+            CallCount++;
+
             return Task.FromResult(result);
         }
     }
@@ -87,9 +97,35 @@ public sealed class RegisterUserHandlerTests
 
     private sealed class FakeUnitOfWork : IUnitOfWork
     {
+        public FakeUnitOfWorkTransaction? Transaction { get; private set; }
+
+        public Task<IUnitOfWorkTransaction> BeginTransactionAsync(CancellationToken cancellationToken = default)
+        {
+            Transaction = new FakeUnitOfWorkTransaction();
+
+            return Task.FromResult<IUnitOfWorkTransaction>(Transaction);
+        }
+
         public Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {
             return Task.FromResult(1);
+        }
+    }
+
+    private sealed class FakeUnitOfWorkTransaction : IUnitOfWorkTransaction
+    {
+        public bool IsCommitted { get; private set; }
+
+        public Task CommitAsync(CancellationToken cancellationToken = default)
+        {
+            IsCommitted = true;
+
+            return Task.CompletedTask;
+        }
+
+        public ValueTask DisposeAsync()
+        {
+            return ValueTask.CompletedTask;
         }
     }
 }
