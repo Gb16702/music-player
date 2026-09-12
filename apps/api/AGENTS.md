@@ -45,4 +45,4 @@ Integration tests use dummy DB strings; no real DB tests yet.
 
 ## Next
 
-Typed registration errors → atomic create → `POST /api/v1/auth/register` with Problem Details (`400`/`409`).
+Atomic account + profile creation → `POST /api/v1/auth/register` with Problem Details (`400`/`409`).

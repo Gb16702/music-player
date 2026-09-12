@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 using MusicPlayer.Application.Abstractions.Identity;
+using MusicPlayer.Application.Common;
 
 namespace MusicPlayer.Infrastructure.Identity
 {
@@ -12,7 +13,7 @@ namespace MusicPlayer.Infrastructure.Identity
             _userManager = userManager;
         }
 
-        public async Task<Guid> CreateUserAsync(string email, string password, CancellationToken cancellationToken)
+        public async Task<Result<Guid>> CreateUserAsync(string email, string password, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
@@ -27,10 +28,10 @@ namespace MusicPlayer.Infrastructure.Identity
 
             if (!result.Succeeded)
             {
-                throw new InvalidOperationException("User creation failed");
+                return Result<Guid>.Failure(IdentityErrorMapper.Map(result.Errors));
             }
 
-            return user.Id;
+            return Result<Guid>.Success(user.Id);
         }
     }
 }

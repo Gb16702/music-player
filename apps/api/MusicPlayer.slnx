@@ -6,8 +6,10 @@
     <Project Path="src/MusicPlayer.Infrastructure/MusicPlayer.Infrastructure.csproj" />
   </Folder>
   <Folder Name="/tests/">
+    <Project Path="tests/MusicPlayer.Application.UnitTests/MusicPlayer.Application.UnitTests.csproj" />
     <Project Path="tests/MusicPlayer.ArchitectureTests/MusicPlayer.ArchitectureTests.csproj" />
     <Project Path="tests/MusicPlayer.Domain.UnitTests/MusicPlayer.Domain.UnitTests.csproj" Id="31a9cbac-7b1e-471b-aa6d-64fdd1659169" />
+    <Project Path="tests/MusicPlayer.Infrastructure.UnitTests/MusicPlayer.Infrastructure.UnitTests.csproj" />
     <Project Path="tests/MusicPlayer.IntegrationTests/MusicPlayer.IntegrationTests.csproj" />
   </Folder>
 </Solution>

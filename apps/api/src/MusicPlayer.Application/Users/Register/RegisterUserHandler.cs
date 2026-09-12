@@ -1,5 +1,6 @@
 using MusicPlayer.Application.Abstractions.Identity;
 using MusicPlayer.Application.Abstractions.Persistence;
+using MusicPlayer.Application.Common;
 using MusicPlayer.Domain.Users;
 
 namespace MusicPlayer.Application.Users.Register
@@ -17,17 +18,29 @@ namespace MusicPlayer.Application.Users.Register
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<Guid> HandleAsync(RegisterUserCommand command, CancellationToken cancellationToken)
+        public async Task<Result<Guid>> HandleAsync(RegisterUserCommand command, CancellationToken cancellationToken)
         {
-            var userId = await _identityService.CreateUserAsync(command.Email, command.Password, cancellationToken);
+            var createUserResult = await _identityService.CreateUserAsync(command.Email, command.Password, cancellationToken);
 
-            var userProfile = new UserProfile(userId, command.DisplayName);
+            if (!createUserResult.IsSuccess)
+            {
+                return Result<Guid>.Failure(createUserResult.Error!);
+            }
 
-            _userProfileRepository.Add(userProfile);
+            try
+            {
+                var userProfile = new UserProfile(createUserResult.Value!, command.DisplayName);
 
-            await _unitOfWork.SaveChangesAsync(cancellationToken);
+                _userProfileRepository.Add(userProfile);
 
-            return userId;
+                await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+                return Result<Guid>.Success(createUserResult.Value!);
+            }
+            catch (ArgumentException exception)
+            {
+                return Result<Guid>.Failure(RegistrationErrors.InvalidDisplayName(exception.Message));
+            }
         }
     }
 }
