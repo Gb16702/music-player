@@ -1,0 +1,12 @@
+---
+description: Global agent behavior and constraints
+alwaysApply: true
+---
+
+# Project
+
+- Implement directly; inspect code first; run tests after significant changes; fix failures autonomously.
+- Ask confirmation only for ambiguous product decisions. Commit only when requested.
+- Never commit secrets. Spotify secret stays server-side.
+- Bun + Biome. EF migrations for schema changes. Regenerate `packages/api-client`, do not edit it.
+- API prefix `/api/v1`. Clean Architecture tests must pass.

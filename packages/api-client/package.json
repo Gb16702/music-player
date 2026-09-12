@@ -1,0 +1,14 @@
+{
+  "name": "@music-player/api-client",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@hey-api/client-fetch": "^0.13.1",
+    "@tanstack/react-query": "^5.102.8",
+    "valibot": "^1.4.2"
+  }
+}

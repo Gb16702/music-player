@@ -1,0 +1,11 @@
+---
+description: Frontend patterns
+globs: apps/web/**,packages/**
+alwaysApply: false
+---
+
+# Web
+
+Server state in TanStack Query. Client UI state in Zustand. Validate API responses with Valibot. Import from `@music-player/api-client`.
+
+`src/routeTree.gen.ts` and `packages/api-client/src/generated/` are generated — do not edit.

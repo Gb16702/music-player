@@ -1,0 +1,7 @@
+---
+description: Generated OpenAPI client
+globs: packages/api-client/src/generated/**
+alwaysApply: false
+---
+
+Do not edit. Regenerate: `bun run generate:api-client` (API on :5100).

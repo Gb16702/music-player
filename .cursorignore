@@ -1,0 +1,10 @@
+﻿packages/api-client/src/generated/
+**/bin/
+**/obj/
+node_modules/
+.bun/
+.output/
+.vinxi/
+dist/
+coverage/
+TestResults/

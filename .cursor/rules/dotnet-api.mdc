@@ -1,0 +1,11 @@
+---
+description: .NET API patterns
+globs: apps/api/**
+alwaysApply: false
+---
+
+# API
+
+New use case: command + handler in Application, ports in `Abstractions/`, implementations in Infrastructure, register in `Application.DependencyInjection`, endpoint in `Api/Endpoints/`.
+
+Schema changes via EF migrations only. Map validation/conflicts to Problem Details (`400`/`409`).
