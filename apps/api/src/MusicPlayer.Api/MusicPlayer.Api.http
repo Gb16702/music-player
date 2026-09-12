@@ -12,3 +12,25 @@ Accept: application/json
 
 GET {{MusicPlayer.ApiHost}}/openapi/v1.json
 Accept: application/json
+
+###
+
+POST {{MusicPlayer.ApiHost}}/api/v1/auth/register
+Content-Type: application/json
+
+{
+  "email": "user@example.com",
+  "password": "Password1!",
+  "displayName": "Jane Doe"
+}
+
+###
+
+POST {{MusicPlayer.ApiHost}}/api/v1/auth/login
+Content-Type: application/json
+
+{
+  "email": "user@example.com",
+  "password": "Password1!",
+  "rememberMe": true
+}

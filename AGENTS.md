@@ -1,6 +1,6 @@
 # Music Player
 
-Portfolio music player, Apple Music (Windows) inspired UI. Platform owns accounts, profiles, likes, playlists. Spotify is optional.
+Portfolio music player, Apple Music (Windows) inspired UI. Platform owns accounts, profiles, likes, playlists.
 
 ## Stack
 
@@ -19,19 +19,41 @@ packages/api-client/   Generated client — regenerate, do not edit
 
 Area context: `apps/api/AGENTS.md`, `apps/web/AGENTS.md`, `packages/api-client/AGENTS.md`.
 
-## Current work: registration
+## Auth (target)
 
-```text
-RegisterUserCommand → RegisterUserHandler
-  → IIdentityService → IUserProfileRepository → IUnitOfWork
-```
+Entry page: social buttons (Google, Spotify) + switch between magic link and email/password.
 
-Done: handler + DI (`AddApplication`), persistence, 9 backend tests, frontend status page.
+| Method | Notes |
+|---|---|
+| Google OAuth | Primary passwordless path |
+| Spotify OAuth | Creates account + stores API tokens; no separate link step |
+| Magic link | Email only; no password on our app |
+| Email + password | Fallback |
 
-Next:
-1. `POST /api/v1/auth/register` + tests
+Rules:
+- App account (`ApplicationUser`) is always the source of truth.
+- `UserProfile` (display name, avatar, etc.) is app-owned — never copy provider name/photo as canonical.
+- Spotify email is not guaranteed (`user-read-email` scope + verified account required).
+- Spotify signup stores tokens immediately; email signup links Spotify later via integration endpoint.
 
-Blockers: no HTTP endpoint yet.
+## Onboarding (target)
+
+Required after first auth, regardless of method:
+- Choose display name (username on platform)
+- Choose profile image
+- Optional skippable steps for a styled multi-step flow
+
+`OnboardingCompleted` gates app access. Provider data may pre-fill suggestions only.
+
+Current `POST /auth/register` (email + password + displayName) is interim — displayName will move to onboarding.
+
+## Current API work
+
+Auth: register + login (cookie), typed errors, atomic transaction, validation tests. DB integration tests require Docker (skipped otherwise).
+
+Next: magic link, social OAuth, onboarding refactor.
+
+Test in Scalar: `http://localhost:5100/scalar`
 
 ## Commands
 

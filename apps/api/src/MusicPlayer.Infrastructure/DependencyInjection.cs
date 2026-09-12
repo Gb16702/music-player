@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -25,13 +27,36 @@ namespace MusicPlayer.Infrastructure
 
             var identityBuilder = services.AddIdentityCore<ApplicationUser>();
 
-            identityBuilder.AddEntityFrameworkStores<MusicPlayerDbContext>();
+            identityBuilder
+                .AddEntityFrameworkStores<MusicPlayerDbContext>()
+                .AddSignInManager();
+
+            services.AddAuthentication(IdentityConstants.ApplicationScheme)
+                .AddCookie(IdentityConstants.ApplicationScheme, options =>
+                {
+                    options.Cookie.HttpOnly = true;
+                    options.Cookie.SameSite = SameSiteMode.Lax;
+                });
+
+            services.AddAuthorization();
+
+            services.Configure<IdentityOptions>(options =>
+            {
+                options.User.RequireUniqueEmail = true;
+
+                options.Password.RequiredLength = 8;
+                options.Password.RequireDigit = true;
+                options.Password.RequireLowercase = true;
+                options.Password.RequireUppercase = true;
+                options.Password.RequireNonAlphanumeric = false;
+            });
 
             services.AddScoped<IUserProfileRepository, UserProfileRepository>();
 
             services.AddScoped<IUnitOfWork>(provider => provider.GetRequiredService<MusicPlayerDbContext>());
 
             services.AddScoped<IIdentityService, IdentityService>();
+            services.AddScoped<IAuthSignInService, AuthSignInService>();
 
             services.AddOptions<SpotifyOptions>()
                 .Bind(configuration.GetSection(SpotifyOptions.SectionName))

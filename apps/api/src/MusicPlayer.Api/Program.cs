@@ -27,6 +27,8 @@ builder.Services.AddCors(options =>
 var app = builder.Build();
 
 app.UseExceptionHandler();
+app.UseAuthentication();
+app.UseAuthorization();
 
 if (app.Environment.IsDevelopment())
 {
@@ -40,6 +42,7 @@ app.MapHealthChecks("/health");
 var api = app.MapGroup("/api/v1");
 
 api.MapSystemEndpoints();
+api.MapAuthEndpoints();
 
 app.Run();
 

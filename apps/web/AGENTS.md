@@ -25,6 +25,12 @@ bun run test:web
 bun run build:web
 ```
 
+## Auth UI (target)
+
+Entry page: Google + Spotify buttons, switch magic link / email+password.
+
+After any auth method → onboarding (display name, avatar, optional skippable steps) before app access.
+
 ## State
 
-Status page at `/` works. App shell, auth, player not built yet. Wait for stable registration API before auth forms.
+Status page at `/` works. Auth and onboarding not built yet.

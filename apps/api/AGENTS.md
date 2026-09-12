@@ -9,13 +9,15 @@ Clean Architecture: Domain → Application ← Infrastructure; API composes both
 - `Infrastructure` — EF Core, Identity, Spotify options
 - `Api` — endpoints, `Program.cs`
 
-## Registration
+## Auth
 
-`RegisterUserHandler` registered via `AddApplication()`. No HTTP endpoint yet.
+Interim: `POST /api/v1/auth/register`, `POST /api/v1/auth/login` (cookie auth).
 
-`IUnitOfWork` = scoped `MusicPlayerDbContext`.
+Target: Google/Spotify OAuth, magic link, onboarding decoupled from register.
 
-Identity: `ApplicationUser` + `UserProfile` (1:1, cascade delete). No roles.
+`ApplicationUser` = auth account. `UserProfile` = app-owned public identity. Provider data never canonical.
+
+`IUnitOfWork` = scoped `MusicPlayerDbContext`. Identity + `UserProfile` 1:1, cascade delete.
 
 ## Key paths
 
@@ -45,4 +47,4 @@ Integration tests use dummy DB strings; no real DB tests yet.
 
 ## Next
 
-`POST /api/v1/auth/register` with Problem Details (`400`/`409`) + real DB integration tests.
+Real DB integration tests for registration (success, duplicate email, invalid password).
