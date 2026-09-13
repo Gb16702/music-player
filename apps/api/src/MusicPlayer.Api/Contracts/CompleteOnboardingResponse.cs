@@ -1,8 +1,7 @@
 namespace MusicPlayer.Api.Contracts;
 
-public sealed record CurrentUserResponse(
+public sealed record CompleteOnboardingResponse(
     Guid UserId,
-    string Email,
-    string? DisplayName,
+    string DisplayName,
     string? AvatarUrl,
     bool OnboardingCompleted);

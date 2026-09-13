@@ -13,17 +13,20 @@ public sealed class RegisterUserHandlerTests
     {
         var userId = Guid.NewGuid();
         var unitOfWork = new FakeUnitOfWork();
+        var userProfileRepository = new FakeUserProfileRepository();
         var handler = CreateHandler(
             new FakeIdentityService(Result<Guid>.Success(userId)),
-            new FakeUserProfileRepository(),
+            userProfileRepository,
             unitOfWork);
 
         var result = await handler.HandleAsync(
-            new RegisterUserCommand("user@example.com", "Password1!", "Jane Doe"),
+            new RegisterUserCommand("user@example.com", "Password1!"),
             CancellationToken.None);
 
         Assert.True(result.IsSuccess);
         Assert.Equal(userId, result.Value);
+        Assert.Single(userProfileRepository.Profiles);
+        Assert.False(userProfileRepository.Profiles[0].OnboardingCompleted);
         Assert.True(unitOfWork.Transaction!.IsCommitted);
     }
 
@@ -38,31 +41,13 @@ public sealed class RegisterUserHandlerTests
             unitOfWork);
 
         var result = await handler.HandleAsync(
-            new RegisterUserCommand("user@example.com", "Password1!", "Jane Doe"),
+            new RegisterUserCommand("user@example.com", "Password1!"),
             CancellationToken.None);
 
         Assert.False(result.IsSuccess);
         Assert.Equal(RegistrationErrors.EmailAlreadyExistsCode, result.Error!.Code);
         Assert.Equal("Email is already taken.", result.Error.Message);
         Assert.False(unitOfWork.Transaction!.IsCommitted);
-    }
-
-    [Fact]
-    public async Task HandleAsyncReturnsInvalidDisplayNameWhenProfileIsInvalid()
-    {
-        var identityService = new FakeIdentityService(Result<Guid>.Success(Guid.NewGuid()));
-        var handler = CreateHandler(
-            identityService,
-            new FakeUserProfileRepository(),
-            new FakeUnitOfWork());
-
-        var result = await handler.HandleAsync(
-            new RegisterUserCommand("user@example.com", "Password1!", " "),
-            CancellationToken.None);
-
-        Assert.False(result.IsSuccess);
-        Assert.Equal(RegistrationErrors.InvalidDisplayNameCode, result.Error!.Code);
-        Assert.Equal(0, identityService.CallCount);
     }
 
     private static RegisterUserHandler CreateHandler(

@@ -28,7 +28,7 @@ public sealed class AuthSessionEndpointDatabaseTests(PostgresTestFixture postgre
 
         var registerResponse = await client.PostAsJsonAsync(
             "/api/v1/auth/register",
-            new RegisterRequest(email, password, "Jane Doe"));
+            new RegisterRequest(email, password));
 
         Assert.Equal(HttpStatusCode.Created, registerResponse.StatusCode);
 
@@ -52,7 +52,7 @@ public sealed class AuthSessionEndpointDatabaseTests(PostgresTestFixture postgre
     }
 
     [SkippableFact]
-    public async Task GetCurrentUserReturnsProfileWhenAuthenticated()
+    public async Task GetCurrentUserReturnsPendingOnboardingWhenAuthenticated()
     {
         Skip.IfNot(postgres.IsAvailable, "Docker is required for database integration tests.");
 
@@ -63,11 +63,10 @@ public sealed class AuthSessionEndpointDatabaseTests(PostgresTestFixture postgre
 
         var email = $"me-{Guid.NewGuid():N}@example.com";
         var password = "Password1!";
-        var displayName = "Jane Doe";
 
         var registerResponse = await client.PostAsJsonAsync(
             "/api/v1/auth/register",
-            new RegisterRequest(email, password, displayName));
+            new RegisterRequest(email, password));
 
         Assert.Equal(HttpStatusCode.Created, registerResponse.StatusCode);
 
@@ -86,7 +85,9 @@ public sealed class AuthSessionEndpointDatabaseTests(PostgresTestFixture postgre
         Assert.NotNull(payload);
         Assert.NotEqual(Guid.Empty, payload.UserId);
         Assert.Equal(email, payload.Email);
-        Assert.Equal(displayName, payload.DisplayName);
+        Assert.Null(payload.DisplayName);
+        Assert.Null(payload.AvatarUrl);
+        Assert.False(payload.OnboardingCompleted);
     }
 
     private WebApplicationFactory<Program> CreateFactory()

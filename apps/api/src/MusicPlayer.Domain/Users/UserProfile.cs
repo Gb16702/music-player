@@ -4,7 +4,9 @@ namespace MusicPlayer.Domain.Users
     {
         public const int MaxDisplayNameLength = 50;
 
-        public UserProfile(Guid userId, string displayName)
+        public const int MaxAvatarUrlLength = 2048;
+
+        public UserProfile(Guid userId)
         {
             if (userId == Guid.Empty)
             {
@@ -12,12 +14,28 @@ namespace MusicPlayer.Domain.Users
             }
 
             UserId = userId;
-            DisplayName = NormalizeDisplayName(displayName);
+            OnboardingCompleted = false;
         }
 
         public Guid UserId { get; private set; }
 
-        public string DisplayName { get; private set; }
+        public string? DisplayName { get; private set; }
+
+        public string? AvatarUrl { get; private set; }
+
+        public bool OnboardingCompleted { get; private set; }
+
+        public void CompleteOnboarding(string displayName, string? avatarUrl)
+        {
+            if (OnboardingCompleted)
+            {
+                throw new InvalidOperationException("Onboarding has already been completed.");
+            }
+
+            DisplayName = NormalizeDisplayName(displayName);
+            AvatarUrl = NormalizeAvatarUrl(avatarUrl);
+            OnboardingCompleted = true;
+        }
 
         public void ChangeDisplayName(string displayName)
         {
@@ -39,6 +57,29 @@ namespace MusicPlayer.Domain.Users
             }
 
             return normalizedDisplayName;
+        }
+
+        public static string? NormalizeAvatarUrl(string? avatarUrl)
+        {
+            if (string.IsNullOrWhiteSpace(avatarUrl))
+            {
+                return null;
+            }
+
+            var normalizedAvatarUrl = avatarUrl.Trim();
+
+            if (normalizedAvatarUrl.Length > MaxAvatarUrlLength)
+            {
+                throw new ArgumentException($"Avatar URL cannot exceed {MaxAvatarUrlLength} characters.", nameof(avatarUrl));
+            }
+
+            if (!Uri.TryCreate(normalizedAvatarUrl, UriKind.Absolute, out var uri)
+                || (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps))
+            {
+                throw new ArgumentException("Avatar URL must be a valid absolute HTTP or HTTPS URL.", nameof(avatarUrl));
+            }
+
+            return normalizedAvatarUrl;
         }
     }
 }

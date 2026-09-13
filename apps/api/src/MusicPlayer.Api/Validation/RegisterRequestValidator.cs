@@ -1,6 +1,5 @@
 using System.Net.Mail;
 using MusicPlayer.Api.Contracts;
-using MusicPlayer.Domain.Users;
 
 namespace MusicPlayer.Api.Validation;
 
@@ -33,15 +32,6 @@ internal static class RegisterRequestValidator
         if (string.IsNullOrWhiteSpace(request.Password))
         {
             errors["password"] = ["Password is required."];
-        }
-
-        if (string.IsNullOrWhiteSpace(request.DisplayName))
-        {
-            errors["displayName"] = ["Display name is required."];
-        }
-        else if (request.DisplayName.Trim().Length > UserProfile.MaxDisplayNameLength)
-        {
-            errors["displayName"] = [$"Display name cannot exceed {UserProfile.MaxDisplayNameLength} characters."];
         }
 
         return errors;

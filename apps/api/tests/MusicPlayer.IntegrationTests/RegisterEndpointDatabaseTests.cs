@@ -14,7 +14,7 @@ namespace MusicPlayer.IntegrationTests;
 public sealed class RegisterEndpointDatabaseTests(PostgresTestFixture postgres)
 {
     [SkippableFact]
-    public async Task RegisterCreatesUserAndProfile()
+    public async Task RegisterCreatesUserAndPendingProfile()
     {
         Skip.IfNot(postgres.IsAvailable, "Docker is required for database integration tests.");
 
@@ -26,7 +26,7 @@ public sealed class RegisterEndpointDatabaseTests(PostgresTestFixture postgres)
 
         var response = await client.PostAsJsonAsync(
             "/api/v1/auth/register",
-            new RegisterRequest(email, "Password1!", "Jane Doe"));
+            new RegisterRequest(email, "Password1!"));
 
         Assert.Equal(HttpStatusCode.Created, response.StatusCode);
 
@@ -37,8 +37,10 @@ public sealed class RegisterEndpointDatabaseTests(PostgresTestFixture postgres)
 
         await using var scope = factory.Services.CreateAsyncScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<MusicPlayerDbContext>();
+        var profile = await dbContext.UserProfiles.SingleAsync(item => item.UserId == payload.UserId);
 
-        Assert.Equal(1, await dbContext.UserProfiles.CountAsync(profile => profile.UserId == payload.UserId));
+        Assert.Null(profile.DisplayName);
+        Assert.False(profile.OnboardingCompleted);
     }
 
     [SkippableFact]
@@ -51,7 +53,7 @@ public sealed class RegisterEndpointDatabaseTests(PostgresTestFixture postgres)
 
         using var client = factory.CreateClient();
         var email = $"duplicate-{Guid.NewGuid():N}@example.com";
-        var request = new RegisterRequest(email, "Password1!", "Jane Doe");
+        var request = new RegisterRequest(email, "Password1!");
 
         var firstResponse = await client.PostAsJsonAsync("/api/v1/auth/register", request);
         var secondResponse = await client.PostAsJsonAsync("/api/v1/auth/register", request);
@@ -80,7 +82,7 @@ public sealed class RegisterEndpointDatabaseTests(PostgresTestFixture postgres)
 
         var registerResponse = await client.PostAsJsonAsync(
             "/api/v1/auth/register",
-            new RegisterRequest(email, password, "Jane Doe"));
+            new RegisterRequest(email, password));
 
         Assert.Equal(HttpStatusCode.Created, registerResponse.StatusCode);
 

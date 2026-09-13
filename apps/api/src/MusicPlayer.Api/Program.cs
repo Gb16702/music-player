@@ -43,6 +43,7 @@ var api = app.MapGroup("/api/v1");
 
 api.MapSystemEndpoints();
 api.MapAuthEndpoints();
+api.MapOnboardingEndpoints();
 
 app.Run();
 

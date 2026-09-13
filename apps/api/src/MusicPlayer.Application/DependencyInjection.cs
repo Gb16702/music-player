@@ -1,4 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
+using MusicPlayer.Application.Users.CompleteOnboarding;
 using MusicPlayer.Application.Users.GetCurrentUser;
 using MusicPlayer.Application.Users.Login;
 using MusicPlayer.Application.Users.Logout;
@@ -14,6 +15,7 @@ namespace MusicPlayer.Application
             services.AddScoped<ILoginUserHandler, LoginUserHandler>();
             services.AddScoped<ILogoutUserHandler, LogoutUserHandler>();
             services.AddScoped<IGetCurrentUserHandler, GetCurrentUserHandler>();
+            services.AddScoped<ICompleteOnboardingHandler, CompleteOnboardingHandler>();
 
             return services;
         }

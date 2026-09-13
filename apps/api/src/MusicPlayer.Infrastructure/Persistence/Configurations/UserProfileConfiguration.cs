@@ -14,7 +14,12 @@ namespace MusicPlayer.Infrastructure.Persistence.Configurations
             builder.HasKey(profile => profile.UserId);
 
             builder.Property(profile => profile.DisplayName)
-                .HasMaxLength(UserProfile.MaxDisplayNameLength)
+                .HasMaxLength(UserProfile.MaxDisplayNameLength);
+
+            builder.Property(profile => profile.AvatarUrl)
+                .HasMaxLength(UserProfile.MaxAvatarUrlLength);
+
+            builder.Property(profile => profile.OnboardingCompleted)
                 .IsRequired();
 
             builder.HasOne<ApplicationUser>()

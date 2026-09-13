@@ -53,10 +53,7 @@ internal static class AuthEndpoints
             return TypedResults.ValidationProblem(validationErrors);
         }
 
-        var command = new RegisterUserCommand(
-            request.Email.Trim(),
-            request.Password,
-            request.DisplayName);
+        var command = new RegisterUserCommand(request.Email.Trim(), request.Password);
 
         var result = await handler.HandleAsync(command, cancellationToken);
 
@@ -121,7 +118,13 @@ internal static class AuthEndpoints
         {
             var currentUser = result.Value!;
 
-            return TypedResults.Ok(new CurrentUserResponse(currentUser.UserId, currentUser.Email, currentUser.DisplayName));
+            return TypedResults.Ok(
+                new CurrentUserResponse(
+                    currentUser.UserId,
+                    currentUser.Email,
+                    currentUser.DisplayName,
+                    currentUser.AvatarUrl,
+                    currentUser.OnboardingCompleted));
         }
 
         return TypedResults.NotFound(new AuthErrorResponse(result.Error!.Code, result.Error.Message));

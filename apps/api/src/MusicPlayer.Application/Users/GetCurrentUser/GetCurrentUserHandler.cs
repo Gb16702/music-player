@@ -31,7 +31,13 @@ namespace MusicPlayer.Application.Users.GetCurrentUser
                 return Result<CurrentUser>.Failure(GetCurrentUserErrors.UserNotFound());
             }
 
-            return Result<CurrentUser>.Success(new CurrentUser(query.UserId, email, profile.DisplayName));
+            return Result<CurrentUser>.Success(
+                new CurrentUser(
+                    query.UserId,
+                    email,
+                    profile.DisplayName,
+                    profile.AvatarUrl,
+                    profile.OnboardingCompleted));
         }
     }
 }

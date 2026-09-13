@@ -17,7 +17,7 @@ public sealed class RegisterEndpointTests(MusicPlayerApiFactory application)
 
         var response = await client.PostAsJsonAsync(
             "/api/v1/auth/register",
-            new RegisterRequest(string.Empty, "Password1!", "Jane Doe"));
+            new RegisterRequest(string.Empty, "Password1!"));
 
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
 
@@ -34,7 +34,7 @@ public sealed class RegisterEndpointTests(MusicPlayerApiFactory application)
 
         var response = await client.PostAsJsonAsync(
             "/api/v1/auth/register",
-            new RegisterRequest("user@example.com", string.Empty, "Jane Doe"));
+            new RegisterRequest("user@example.com", string.Empty));
 
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
 
@@ -42,23 +42,6 @@ public sealed class RegisterEndpointTests(MusicPlayerApiFactory application)
 
         Assert.NotNull(problem);
         Assert.True(problem.Errors.ContainsKey("password"));
-    }
-
-    [Fact]
-    public async Task RegisterReturnsValidationProblemWhenDisplayNameIsMissing()
-    {
-        using var client = application.CreateClient();
-
-        var response = await client.PostAsJsonAsync(
-            "/api/v1/auth/register",
-            new RegisterRequest("user@example.com", "Password1!", " "));
-
-        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-
-        var problem = await response.Content.ReadFromJsonAsync<ValidationProblemDetails>(JsonOptions);
-
-        Assert.NotNull(problem);
-        Assert.True(problem.Errors.ContainsKey("displayName"));
     }
 
     private sealed class ValidationProblemDetails

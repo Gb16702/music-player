@@ -11,8 +11,11 @@ public sealed class GetCurrentUserHandlerTests
     public async Task HandleAsyncReturnsCurrentUserWhenProfileAndEmailExist()
     {
         var userId = Guid.NewGuid();
+        var profile = new UserProfile(userId);
+        profile.CompleteOnboarding("Jane Doe", "https://example.com/avatar.png");
+
         var handler = new GetCurrentUserHandler(
-            new FakeUserProfileRepository(new UserProfile(userId, "Jane Doe")),
+            new FakeUserProfileRepository(profile),
             new FakeUserAccountReader("user@example.com"));
 
         var result = await handler.HandleAsync(new GetCurrentUserQuery(userId), CancellationToken.None);
@@ -21,6 +24,24 @@ public sealed class GetCurrentUserHandlerTests
         Assert.Equal(userId, result.Value!.UserId);
         Assert.Equal("user@example.com", result.Value.Email);
         Assert.Equal("Jane Doe", result.Value.DisplayName);
+        Assert.Equal("https://example.com/avatar.png", result.Value.AvatarUrl);
+        Assert.True(result.Value.OnboardingCompleted);
+    }
+
+    [Fact]
+    public async Task HandleAsyncReturnsPendingOnboardingState()
+    {
+        var userId = Guid.NewGuid();
+        var handler = new GetCurrentUserHandler(
+            new FakeUserProfileRepository(new UserProfile(userId)),
+            new FakeUserAccountReader("user@example.com"));
+
+        var result = await handler.HandleAsync(new GetCurrentUserQuery(userId), CancellationToken.None);
+
+        Assert.True(result.IsSuccess);
+        Assert.Null(result.Value!.DisplayName);
+        Assert.Null(result.Value.AvatarUrl);
+        Assert.False(result.Value.OnboardingCompleted);
     }
 
     [Fact]
@@ -41,7 +62,7 @@ public sealed class GetCurrentUserHandlerTests
     {
         var userId = Guid.NewGuid();
         var handler = new GetCurrentUserHandler(
-            new FakeUserProfileRepository(new UserProfile(userId, "Jane Doe")),
+            new FakeUserProfileRepository(new UserProfile(userId)),
             new FakeUserAccountReader(null));
 
         var result = await handler.HandleAsync(new GetCurrentUserQuery(userId), CancellationToken.None);
