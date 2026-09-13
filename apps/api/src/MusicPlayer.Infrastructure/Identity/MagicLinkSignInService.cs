@@ -50,7 +50,7 @@ namespace MusicPlayer.Infrastructure.Identity
                 }
             }
 
-            await _signInManager.SignInAsync(user, isPersistent: false);
+            await _signInManager.SignInAsync(user, isPersistent: true);
 
             return Result<Guid>.Success(user.Id);
         }

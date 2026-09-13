@@ -40,6 +40,8 @@ namespace MusicPlayer.Infrastructure
                 {
                     options.Cookie.HttpOnly = true;
                     options.Cookie.SameSite = SameSiteMode.Lax;
+                    options.ExpireTimeSpan = TimeSpan.FromDays(14);
+                    options.SlidingExpiration = true;
                 });
 
             services.AddAuthorization();
