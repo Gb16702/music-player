@@ -6,6 +6,8 @@ using MusicPlayer.Application.Users.GetCurrentUser;
 using MusicPlayer.Application.Users.Login;
 using MusicPlayer.Application.Users.Logout;
 using MusicPlayer.Application.Users.Register;
+using MusicPlayer.Application.Users.RequestMagicLink;
+using MusicPlayer.Application.Users.VerifyMagicLink;
 
 namespace MusicPlayer.Api.Endpoints;
 
@@ -36,6 +38,18 @@ internal static class AuthEndpoints
             .WithName("GetCurrentUser")
             .WithSummary("Returns the authenticated user profile.")
             .WithDescription("Requires a valid authentication cookie.")
+            .WithTags("Auth");
+
+        group.MapPost("/auth/magic-link/request", RequestMagicLink)
+            .WithName("RequestMagicLink")
+            .WithSummary("Sends a magic link sign-in email.")
+            .WithDescription("Always returns success for valid email requests to avoid account enumeration.")
+            .WithTags("Auth");
+
+        group.MapPost("/auth/magic-link/verify", VerifyMagicLink)
+            .WithName("VerifyMagicLink")
+            .WithSummary("Verifies a magic link token and creates a session.")
+            .WithDescription("Creates an account when the email is new, then signs the user in with a cookie.")
             .WithTags("Auth");
 
         return group;
@@ -128,6 +142,45 @@ internal static class AuthEndpoints
         }
 
         return TypedResults.NotFound(new AuthErrorResponse(result.Error!.Code, result.Error.Message));
+    }
+
+    private static async Task<Results<NoContent, ValidationProblem>> RequestMagicLink(
+        MagicLinkRequest request,
+        IRequestMagicLinkHandler handler,
+        CancellationToken cancellationToken)
+    {
+        var validationErrors = MagicLinkRequestValidator.Validate(request);
+
+        if (validationErrors.Count > 0)
+        {
+            return TypedResults.ValidationProblem(validationErrors);
+        }
+
+        await handler.HandleAsync(new RequestMagicLinkCommand(request.Email.Trim()), cancellationToken);
+
+        return TypedResults.NoContent();
+    }
+
+    private static async Task<Results<Ok<LoginResponse>, BadRequest<AuthErrorResponse>, ValidationProblem>> VerifyMagicLink(
+        MagicLinkVerifyRequest request,
+        IVerifyMagicLinkHandler handler,
+        CancellationToken cancellationToken)
+    {
+        var validationErrors = MagicLinkVerifyRequestValidator.Validate(request);
+
+        if (validationErrors.Count > 0)
+        {
+            return TypedResults.ValidationProblem(validationErrors);
+        }
+
+        var result = await handler.HandleAsync(new VerifyMagicLinkCommand(request.Token), cancellationToken);
+
+        if (result.IsSuccess)
+        {
+            return TypedResults.Ok(new LoginResponse(result.Value!));
+        }
+
+        return TypedResults.BadRequest(new AuthErrorResponse(result.Error!.Code, result.Error.Message));
     }
 
     private static bool TryGetUserId(ClaimsPrincipal user, out Guid userId)

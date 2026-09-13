@@ -5,6 +5,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using MusicPlayer.Application.Abstractions.Identity;
 using MusicPlayer.Application.Abstractions.Persistence;
+using MusicPlayer.Infrastructure.Email;
 using MusicPlayer.Infrastructure.Identity;
 using MusicPlayer.Infrastructure.Persistence;
 using MusicPlayer.Infrastructure.Persistence.Repositories;
@@ -24,6 +25,9 @@ namespace MusicPlayer.Infrastructure
             }
 
             services.AddDbContext<MusicPlayerDbContext>(optionsBuilder => optionsBuilder.UseNpgsql(connectionString));
+
+            services.AddDataProtection();
+            services.AddEmail(configuration);
 
             var identityBuilder = services.AddIdentityCore<ApplicationUser>();
 
@@ -59,6 +63,9 @@ namespace MusicPlayer.Infrastructure
             services.AddScoped<IAuthSignInService, AuthSignInService>();
             services.AddScoped<IAuthSignOutService, AuthSignOutService>();
             services.AddScoped<IUserAccountReader, UserAccountReader>();
+            services.AddScoped<IMagicLinkTokenService, MagicLinkTokenService>();
+            services.AddScoped<IMagicLinkUrlBuilder, MagicLinkUrlBuilder>();
+            services.AddScoped<IMagicLinkSignInService, MagicLinkSignInService>();
 
             services.AddOptions<SpotifyOptions>()
                 .Bind(configuration.GetSection(SpotifyOptions.SectionName))

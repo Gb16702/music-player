@@ -92,13 +92,7 @@ public sealed class OnboardingEndpointDatabaseTests(PostgresTestFixture postgres
         {
             builder.ConfigureAppConfiguration((_, configuration) =>
             {
-                configuration.AddInMemoryCollection(
-                    new Dictionary<string, string?>
-                    {
-                        ["ConnectionStrings:Database"] = postgres.ConnectionString,
-                        ["Spotify:ClientId"] = "integration-test-client-id",
-                        ["Spotify:ClientSecret"] = "integration-test-client-secret"
-                    });
+                configuration.AddInMemoryCollection(IntegrationTestConfiguration.CreateBaseSettings(postgres.ConnectionString));
             });
         });
     }

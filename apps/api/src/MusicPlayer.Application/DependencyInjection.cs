@@ -4,6 +4,8 @@ using MusicPlayer.Application.Users.GetCurrentUser;
 using MusicPlayer.Application.Users.Login;
 using MusicPlayer.Application.Users.Logout;
 using MusicPlayer.Application.Users.Register;
+using MusicPlayer.Application.Users.RequestMagicLink;
+using MusicPlayer.Application.Users.VerifyMagicLink;
 
 namespace MusicPlayer.Application
 {
@@ -16,6 +18,8 @@ namespace MusicPlayer.Application
             services.AddScoped<ILogoutUserHandler, LogoutUserHandler>();
             services.AddScoped<IGetCurrentUserHandler, GetCurrentUserHandler>();
             services.AddScoped<ICompleteOnboardingHandler, CompleteOnboardingHandler>();
+            services.AddScoped<IRequestMagicLinkHandler, RequestMagicLinkHandler>();
+            services.AddScoped<IVerifyMagicLinkHandler, VerifyMagicLinkHandler>();
 
             return services;
         }
