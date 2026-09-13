@@ -57,6 +57,8 @@ namespace MusicPlayer.Infrastructure
 
             services.AddScoped<IIdentityService, IdentityService>();
             services.AddScoped<IAuthSignInService, AuthSignInService>();
+            services.AddScoped<IAuthSignOutService, AuthSignOutService>();
+            services.AddScoped<IUserAccountReader, UserAccountReader>();
 
             services.AddOptions<SpotifyOptions>()
                 .Bind(configuration.GetSection(SpotifyOptions.SectionName))

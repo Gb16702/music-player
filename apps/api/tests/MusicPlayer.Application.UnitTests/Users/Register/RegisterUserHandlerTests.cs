@@ -93,6 +93,11 @@ public sealed class RegisterUserHandlerTests
         {
             Profiles.Add(profile);
         }
+
+        public Task<UserProfile?> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken)
+        {
+            return Task.FromResult(Profiles.FirstOrDefault(profile => profile.UserId == userId));
+        }
     }
 
     private sealed class FakeUnitOfWork : IUnitOfWork

@@ -5,5 +5,7 @@ namespace MusicPlayer.Application.Abstractions.Persistence
     public interface IUserProfileRepository
     {
         void Add(UserProfile profile);
+
+        Task<UserProfile?> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken);
     }
 }

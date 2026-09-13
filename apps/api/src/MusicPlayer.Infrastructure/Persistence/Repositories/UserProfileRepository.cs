@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using MusicPlayer.Application.Abstractions.Persistence;
 using MusicPlayer.Domain.Users;
 
@@ -15,6 +16,11 @@ namespace MusicPlayer.Infrastructure.Persistence.Repositories
         public void Add(UserProfile profile)
         {
             _dbContext.UserProfiles.Add(profile);
+        }
+
+        public Task<UserProfile?> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken)
+        {
+            return _dbContext.UserProfiles.FirstOrDefaultAsync(profile => profile.UserId == userId, cancellationToken);
         }
     }
 }
