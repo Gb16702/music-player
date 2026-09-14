@@ -67,4 +67,4 @@ dotnet test apps/api/MusicPlayer.slnx
 bun run test:web && bun run build:web
 ```
 
-Secrets: `.env` for Docker; API User Secrets for `ConnectionStrings:Database`, `Spotify:ClientId`, `Spotify:ClientSecret`. Never commit secrets.
+Secrets: `.env` for Docker; API User Secrets for `ConnectionStrings:Database`, `Spotify:ClientId`, `Spotify:ClientSecret`, `Google:ClientId`, `Google:ClientSecret`. Never commit secrets.

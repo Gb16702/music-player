@@ -13,10 +13,7 @@ public sealed class MusicPlayerApiFactory : WebApplicationFactory<Program>
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
-        builder.ConfigureAppConfiguration((_, configuration) =>
-        {
-            configuration.AddInMemoryCollection(IntegrationTestConfiguration.CreateBaseSettings());
-        });
+        IntegrationTestConfiguration.ConfigureTestHost(builder);
 
         builder.ConfigureServices(services =>
         {

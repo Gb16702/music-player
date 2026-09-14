@@ -94,10 +94,7 @@ public sealed class AuthSessionEndpointDatabaseTests(PostgresTestFixture postgre
     {
         return new WebApplicationFactory<Program>().WithWebHostBuilder(builder =>
         {
-            builder.ConfigureAppConfiguration((_, configuration) =>
-            {
-                configuration.AddInMemoryCollection(IntegrationTestConfiguration.CreateBaseSettings(postgres.ConnectionString));
-            });
+            IntegrationTestConfiguration.ConfigureTestHost(builder, postgres.ConnectionString);
         });
     }
 

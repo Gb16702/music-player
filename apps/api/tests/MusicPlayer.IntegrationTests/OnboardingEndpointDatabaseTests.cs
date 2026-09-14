@@ -90,10 +90,7 @@ public sealed class OnboardingEndpointDatabaseTests(PostgresTestFixture postgres
     {
         return new WebApplicationFactory<Program>().WithWebHostBuilder(builder =>
         {
-            builder.ConfigureAppConfiguration((_, configuration) =>
-            {
-                configuration.AddInMemoryCollection(IntegrationTestConfiguration.CreateBaseSettings(postgres.ConnectionString));
-            });
+            IntegrationTestConfiguration.ConfigureTestHost(builder, postgres.ConnectionString);
         });
     }
 

@@ -16,11 +16,16 @@ public sealed class PostgresTestFixture : IAsyncLifetime
         {
             _container = new PostgreSqlBuilder()
                 .WithImage("postgres:18-alpine")
+                .WithDatabase("test")
+                .WithUsername("test")
+                .WithPassword("test")
+                .WithPortBinding(15432, 5432)
                 .Build();
 
             await _container.StartAsync();
 
             ConnectionString = _container.GetConnectionString();
+
             IsAvailable = true;
         }
         catch (Exception)

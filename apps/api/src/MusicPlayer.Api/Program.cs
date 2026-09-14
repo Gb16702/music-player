@@ -26,7 +26,14 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-app.UseExceptionHandler();
+if (app.Environment.IsDevelopment())
+{
+    app.UseDeveloperExceptionPage();
+}
+else
+{
+    app.UseExceptionHandler();
+}
 app.UseAuthentication();
 app.UseAuthorization();
 
@@ -43,6 +50,7 @@ var api = app.MapGroup("/api/v1");
 
 api.MapSystemEndpoints();
 api.MapAuthEndpoints();
+api.MapGoogleAuthEndpoints();
 api.MapOnboardingEndpoints();
 
 app.Run();

@@ -1,13 +1,37 @@
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Configuration;
+
 namespace MusicPlayer.IntegrationTests;
 
 internal static class IntegrationTestConfiguration
 {
+    public static void ConfigureTestHost(IWebHostBuilder builder, string? databaseConnectionString = null)
+    {
+        var settings = CreateBaseSettings(databaseConnectionString);
+
+        builder.UseEnvironment("IntegrationTests");
+
+        if (settings.TryGetValue("ConnectionStrings:Database", out var connectionString)
+            && !string.IsNullOrWhiteSpace(connectionString))
+        {
+            builder.UseSetting("ConnectionStrings:Database", connectionString);
+        }
+
+        builder.ConfigureAppConfiguration((_, configuration) =>
+        {
+            configuration.Sources.Clear();
+            configuration.AddInMemoryCollection(settings);
+        });
+    }
+
     public static Dictionary<string, string?> CreateBaseSettings(string? databaseConnectionString = null)
     {
         return new Dictionary<string, string?>
         {
             ["Spotify:ClientId"] = "integration-test-client-id",
             ["Spotify:ClientSecret"] = "integration-test-client-secret",
+            ["Google:ClientId"] = "integration-test-google-client-id",
+            ["Google:ClientSecret"] = "integration-test-google-client-secret",
             ["Email:Provider"] = "Log",
             ["Email:FromAddress"] = "noreply@music-player.test",
             ["Email:FromName"] = "Music Player",
