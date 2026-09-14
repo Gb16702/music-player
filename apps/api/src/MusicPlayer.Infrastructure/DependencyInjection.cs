@@ -1,3 +1,4 @@
+using AspNet.Security.OAuth.Spotify;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Http;
@@ -59,6 +60,8 @@ namespace MusicPlayer.Infrastructure
 
             var googleClientId = configuration["Google:ClientId"];
             var googleClientSecret = configuration["Google:ClientSecret"];
+            var spotifyClientId = configuration["Spotify:ClientId"];
+            var spotifyClientSecret = configuration["Spotify:ClientSecret"];
 
             services.AddAuthentication(options =>
                 {
@@ -115,6 +118,43 @@ namespace MusicPlayer.Infrastructure
 
                         return Task.CompletedTask;
                     };
+                })
+                .AddSpotify(SpotifyAuthenticationDefaults.AuthenticationScheme, options =>
+                {
+                    options.ClientId = spotifyClientId!;
+                    options.ClientSecret = spotifyClientSecret!;
+                    options.CallbackPath = SpotifyAuthConstants.OAuthCallbackPath;
+                    options.SignInScheme = IdentityConstants.ExternalScheme;
+                    options.SaveTokens = true;
+                    options.Scope.Add("user-read-email");
+                    options.Scope.Add("user-read-private");
+                    options.CorrelationCookie.HttpOnly = true;
+                    options.CorrelationCookie.IsEssential = true;
+                    options.CorrelationCookie.Path = "/";
+                    options.CorrelationCookie.SameSite = SameSiteMode.Lax;
+                    options.CorrelationCookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+                    options.Events.OnRemoteFailure = context =>
+                    {
+                        var logger = context.HttpContext.RequestServices
+                            .GetRequiredService<ILoggerFactory>()
+                            .CreateLogger("SpotifyAuthentication");
+
+                        logger.LogWarning(
+                            context.Failure,
+                            "Spotify remote authentication failed.");
+
+                        context.HandleResponse();
+
+                        var redirectBuilder = context.HttpContext.RequestServices
+                            .GetRequiredService<IWebAppRedirectBuilder>();
+
+                        context.Response.Redirect(
+                            redirectBuilder.BuildAuthCallbackErrorUrl(
+                                ExternalAuthErrors.SignInFailedCode,
+                                context.Failure?.Message));
+
+                        return Task.CompletedTask;
+                    };
                 });
 
             services.AddAuthorization();
@@ -144,6 +184,9 @@ namespace MusicPlayer.Infrastructure
             services.AddScoped<IExternalAuthSignInService, ExternalAuthSignInService>();
             services.AddScoped<IGoogleLoginChallengeService, GoogleLoginChallengeService>();
             services.AddScoped<IGoogleSignInCallbackService, GoogleSignInCallbackService>();
+            services.AddScoped<ISpotifyLoginChallengeService, SpotifyLoginChallengeService>();
+            services.AddScoped<ISpotifySignInCallbackService, SpotifySignInCallbackService>();
+            services.AddScoped<IUserSpotifyTokenRepository, UserSpotifyTokenRepository>();
             services.AddScoped<IWebAppRedirectBuilder, WebAppRedirectBuilder>();
 
             services.AddOptions<SpotifyOptions>()

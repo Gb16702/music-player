@@ -1,4 +1,5 @@
 using MusicPlayer.Application.Common;
+using MusicPlayer.Application.Users.SignInWithExternalProvider;
 
 namespace MusicPlayer.Application.Abstractions.Identity
 {
@@ -8,6 +9,7 @@ namespace MusicPlayer.Application.Abstractions.Identity
             string email,
             string loginProvider,
             string providerKey,
+            SpotifyOAuthTokens? spotifyTokens,
             CancellationToken cancellationToken);
     }
 }

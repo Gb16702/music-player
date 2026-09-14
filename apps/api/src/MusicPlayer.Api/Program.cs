@@ -26,7 +26,7 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment() || app.Environment.IsEnvironment("IntegrationTests"))
 {
     app.UseDeveloperExceptionPage();
 }
@@ -51,6 +51,7 @@ var api = app.MapGroup("/api/v1");
 api.MapSystemEndpoints();
 api.MapAuthEndpoints();
 api.MapGoogleAuthEndpoints();
+api.MapSpotifyAuthEndpoints();
 api.MapOnboardingEndpoints();
 
 app.Run();

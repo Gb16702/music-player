@@ -11,10 +11,12 @@ internal static class IntegrationTestConfiguration
 
         builder.UseEnvironment("IntegrationTests");
 
-        if (settings.TryGetValue("ConnectionStrings:Database", out var connectionString)
-            && !string.IsNullOrWhiteSpace(connectionString))
+        foreach (var (key, value) in settings)
         {
-            builder.UseSetting("ConnectionStrings:Database", connectionString);
+            if (!string.IsNullOrWhiteSpace(value))
+            {
+                builder.UseSetting(key, value);
+            }
         }
 
         builder.ConfigureAppConfiguration((_, configuration) =>

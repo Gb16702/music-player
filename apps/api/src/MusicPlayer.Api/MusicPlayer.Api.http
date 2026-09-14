@@ -1,4 +1,4 @@
-@MusicPlayer.ApiHost = http://localhost:5100
+@MusicPlayer.ApiHost = http://127.0.0.1:5100
 
 GET {{MusicPlayer.ApiHost}}/health/
 Accept: text/plain

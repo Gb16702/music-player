@@ -53,7 +53,7 @@ Auth: register + login (cookie), typed errors, atomic transaction, validation te
 
 Next: magic link, social OAuth, onboarding refactor.
 
-Test in Scalar: `http://localhost:5100/scalar`
+Test in Scalar: `http://127.0.0.1:5100/scalar`
 
 ## Commands
 

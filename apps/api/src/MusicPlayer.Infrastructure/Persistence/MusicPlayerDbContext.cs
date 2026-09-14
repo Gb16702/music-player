@@ -18,6 +18,14 @@ namespace MusicPlayer.Infrastructure.Persistence
             }
         }
 
+        public DbSet<UserSpotifyConnection> UserSpotifyConnections
+        {
+            get
+            {
+                return Set<UserSpotifyConnection>();
+            }
+        }
+
         public Task<IUnitOfWorkTransaction> BeginTransactionAsync(CancellationToken cancellationToken = default)
         {
             return BeginTransactionInternalAsync(cancellationToken);

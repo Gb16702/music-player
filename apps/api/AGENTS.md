@@ -13,7 +13,7 @@ Clean Architecture: Domain → Application ← Infrastructure; API composes both
 
 Interim: `POST /api/v1/auth/register`, `POST /api/v1/auth/login` (cookie auth).
 
-Target: Google/Spotify OAuth, magic link, onboarding decoupled from register.
+Target: Google + Spotify OAuth (login/callback), magic link, onboarding decoupled from register. Spotify dev redirect: `http://127.0.0.1:5100/signin-spotify`.
 
 `ApplicationUser` = auth account. `UserProfile` = app-owned public identity. Provider data never canonical.
 

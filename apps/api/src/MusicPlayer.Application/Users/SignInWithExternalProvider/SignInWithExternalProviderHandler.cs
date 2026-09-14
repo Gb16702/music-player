@@ -18,6 +18,7 @@ namespace MusicPlayer.Application.Users.SignInWithExternalProvider
                 command.Email,
                 command.LoginProvider,
                 command.ProviderKey,
+                command.SpotifyTokens,
                 cancellationToken);
         }
     }

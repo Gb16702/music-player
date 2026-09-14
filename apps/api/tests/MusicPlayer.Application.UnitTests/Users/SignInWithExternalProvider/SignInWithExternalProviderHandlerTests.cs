@@ -42,6 +42,7 @@ public sealed class SignInWithExternalProviderHandlerTests
             string email,
             string loginProvider,
             string providerKey,
+            SpotifyOAuthTokens? spotifyTokens,
             CancellationToken cancellationToken)
         {
             return Task.FromResult(result);

@@ -5,6 +5,7 @@ using MusicPlayer.Application.Common;
 using MusicPlayer.Application.Users.Register;
 using MusicPlayer.Application.Users.SignInWithExternalProvider;
 using MusicPlayer.Domain.Users;
+using AspNet.Security.OAuth.Spotify;
 
 namespace MusicPlayer.Infrastructure.Identity
 {
@@ -13,17 +14,20 @@ namespace MusicPlayer.Infrastructure.Identity
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly IUserProfileRepository _userProfileRepository;
+        private readonly IUserSpotifyTokenRepository _userSpotifyTokenRepository;
         private readonly IUnitOfWork _unitOfWork;
 
         public ExternalAuthSignInService(
             UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
             IUserProfileRepository userProfileRepository,
+            IUserSpotifyTokenRepository userSpotifyTokenRepository,
             IUnitOfWork unitOfWork)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _userProfileRepository = userProfileRepository;
+            _userSpotifyTokenRepository = userSpotifyTokenRepository;
             _unitOfWork = unitOfWork;
         }
 
@@ -31,6 +35,7 @@ namespace MusicPlayer.Infrastructure.Identity
             string email,
             string loginProvider,
             string providerKey,
+            SpotifyOAuthTokens? spotifyTokens,
             CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
@@ -51,7 +56,7 @@ namespace MusicPlayer.Infrastructure.Identity
                         ExternalAuthErrors.SignInFailed("Linked user account could not be found."));
                 }
 
-                return Result<Guid>.Success(linkedUser.Id);
+                return await CompleteWithSpotifyTokensAsync(linkedUser.Id, loginProvider, spotifyTokens, cancellationToken);
             }
 
             if (externalSignInResult.IsLockedOut)
@@ -63,16 +68,42 @@ namespace MusicPlayer.Infrastructure.Identity
 
             if (existingUser is not null)
             {
-                return await LinkExternalLoginAndSignInAsync(existingUser, loginProvider, providerKey, cancellationToken);
+                return await LinkExternalLoginAndSignInAsync(
+                    existingUser,
+                    loginProvider,
+                    providerKey,
+                    spotifyTokens,
+                    cancellationToken);
             }
 
-            return await CreateUserWithExternalLoginAsync(normalizedEmail, loginProvider, providerKey, cancellationToken);
+            return await CreateUserWithExternalLoginAsync(
+                normalizedEmail,
+                loginProvider,
+                providerKey,
+                spotifyTokens,
+                cancellationToken);
+        }
+
+        private async Task<Result<Guid>> CompleteWithSpotifyTokensAsync(
+            Guid userId,
+            string loginProvider,
+            SpotifyOAuthTokens? spotifyTokens,
+            CancellationToken cancellationToken)
+        {
+            if (loginProvider == SpotifyAuthenticationDefaults.AuthenticationScheme && spotifyTokens is not null)
+            {
+                await _userSpotifyTokenRepository.UpsertAsync(userId, spotifyTokens, cancellationToken);
+                await _unitOfWork.SaveChangesAsync(cancellationToken);
+            }
+
+            return Result<Guid>.Success(userId);
         }
 
         private async Task<Result<Guid>> LinkExternalLoginAndSignInAsync(
             ApplicationUser user,
             string loginProvider,
             string providerKey,
+            SpotifyOAuthTokens? spotifyTokens,
             CancellationToken cancellationToken)
         {
             var addLoginResult = await _userManager.AddLoginAsync(
@@ -86,13 +117,14 @@ namespace MusicPlayer.Infrastructure.Identity
 
             await _signInManager.SignInAsync(user, isPersistent: true);
 
-            return Result<Guid>.Success(user.Id);
+            return await CompleteWithSpotifyTokensAsync(user.Id, loginProvider, spotifyTokens, cancellationToken);
         }
 
         private async Task<Result<Guid>> CreateUserWithExternalLoginAsync(
             string email,
             string loginProvider,
             string providerKey,
+            SpotifyOAuthTokens? spotifyTokens,
             CancellationToken cancellationToken)
         {
             await using var transaction = await _unitOfWork.BeginTransactionAsync(cancellationToken);
@@ -128,7 +160,7 @@ namespace MusicPlayer.Infrastructure.Identity
 
             await _signInManager.SignInAsync(user, isPersistent: true);
 
-            return Result<Guid>.Success(user.Id);
+            return await CompleteWithSpotifyTokensAsync(user.Id, loginProvider, spotifyTokens, cancellationToken);
         }
     }
 }
